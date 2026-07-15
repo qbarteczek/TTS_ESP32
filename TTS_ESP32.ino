@@ -18,25 +18,30 @@ HIDBoot<HID_PROTOCOL_KEYBOARD> Keyboard(&Usb);
 
 String inputText = "";
 
-class KeyboardReportParser : public KeyboardReportParser {
+class CustomKbdRptParser : public KeyboardReportParser {
 protected:
     void OnKeyDown(uint8_t mod, uint8_t key);
     void OnKeyPressed(uint8_t key);
 };
 
-void KeyboardReportParser::OnKeyDown(uint8_t mod, uint8_t key) {
+void CustomKbdRptParser::OnKeyDown(uint8_t mod, uint8_t key) {
     uint8_t c = OemToAscii(mod, key);
     if (c) OnKeyPressed(c);
 }
 
-void KeyboardReportParser::OnKeyPressed(uint8_t key) {
+void CustomKbdRptParser::OnKeyPressed(uint8_t key) {
     if (key == 13) { // Enter key
         display.clearDisplay(); // Clear the display when Enter is pressed
+        display.setCursor(0, 0);
+        display.println("Mowie...");
         display.display();
 
         // Speak the text and show progress
         sam.Say(inputText.c_str());
         inputText = "";
+        
+        display.clearDisplay();
+        display.display();
     } else {
         inputText += (char)key;
         display.clearDisplay();
@@ -48,7 +53,7 @@ void KeyboardReportParser::OnKeyPressed(uint8_t key) {
     }
 }
 
-KeyboardReportParser KbdPrs;
+CustomKbdRptParser KbdPrs;
 
 void setup() {
     Serial.begin(115200);
